@@ -1,4 +1,4 @@
-module Maybe
+module Vittara
   class << self
     def version
       Semver.new(semver)
