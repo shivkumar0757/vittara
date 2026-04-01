@@ -3,7 +3,7 @@ class Provider::Github
 
   def initialize
     @name = "maybe"
-    @owner = "maybe-finance"
+    @owner = "shivkumar0757"
     @branch = "main"
   end
 

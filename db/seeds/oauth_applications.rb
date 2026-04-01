@@ -1,8 +1,8 @@
-# Create OAuth applications for Maybe's first-party apps
+# Create OAuth applications for Vittara's first-party apps
 # These are the only OAuth apps that will exist - external developers use API keys
 
-# Maybe iOS App
-ios_app = Doorkeeper::Application.find_or_create_by(name: "Maybe iOS") do |app|
+# Vittara iOS App
+ios_app = Doorkeeper::Application.find_or_create_by(name: "Vittara iOS") do |app|
   app.redirect_uri = "maybe://oauth/callback"
   app.scopes = "read_accounts read_transactions read_balances"
   app.confidential = false # Public client (mobile app)
