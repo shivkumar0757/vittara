@@ -6,6 +6,11 @@ require "rails/all"
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
 
+# Vittara — Personal Finance OS
+# Vitta (वित्त) = finance/assets in Sanskrit
+# Astra (अस्त्र) = weapon/tool — "your financial weapon"
+# Vitta + Astra = Vitta·ra → Vittara
+# Forked from Maybe Finance (AGPLv3)
 module Vittara
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
