@@ -190,3 +190,89 @@
     </div>
   <% end %>
 <% end %>
+
+<%# MCP Token Section — always shown below the REST API section %>
+<%= settings_section title: "AI Assistant (MCP)", subtitle: "Connect Vittara to Claude Desktop and other AI assistants via the Model Context Protocol." do %>
+  <% if @mcp_key %>
+    <div class="space-y-4">
+      <div class="p-3 shadow-border-xs bg-container rounded-lg flex justify-between items-center">
+        <div class="flex items-center gap-3">
+          <%= render DS::FilledIcon.new(icon: "bot", rounded: true, size: "lg") %>
+          <div class="text-sm space-y-1">
+            <p class="text-primary font-medium"><%= @mcp_key.name %></p>
+            <p class="text-secondary">
+              Created <%= time_ago_in_words(@mcp_key.created_at) %> ago
+              <% if @mcp_key.last_used_at %>
+                &bull; Last used <%= time_ago_in_words(@mcp_key.last_used_at) %> ago
+              <% else %>
+                &bull; Never used
+              <% end %>
+            </p>
+          </div>
+        </div>
+        <div class="rounded-md bg-success px-2 py-1">
+          <p class="text-success-foreground font-medium text-xs">Active</p>
+        </div>
+      </div>
+
+      <div class="bg-surface-inset rounded-xl p-4">
+        <h4 class="font-medium text-primary mb-1">MCP Token</h4>
+        <p class="text-secondary text-sm mb-3">Use this token in your Claude Desktop config below.</p>
+        <div class="bg-container rounded-lg p-3 border border-primary" data-controller="clipboard">
+          <div class="flex items-center justify-between gap-3">
+            <code class="font-mono text-sm text-primary break-all" data-clipboard-target="source"><%= @mcp_key.plain_key %></code>
+            <%= render DS::Button.new(text: "Copy", variant: "ghost", icon: "copy", data: { action: "clipboard#copy" }) %>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-surface-inset rounded-xl p-4">
+        <h4 class="font-medium text-primary mb-1">Claude Desktop Config</h4>
+        <p class="text-secondary text-sm mb-3">
+          Add this to <code class="font-mono text-xs">~/Library/Application Support/Claude/claude_desktop_config.json</code>, then restart Claude Desktop.
+        </p>
+        <div class="bg-container rounded-lg p-3 border border-primary" data-controller="clipboard">
+          <div class="flex items-start justify-between gap-3">
+            <pre class="font-mono text-xs text-primary whitespace-pre-wrap break-all" data-clipboard-target="source">{
+  "mcpServers": {
+    "vittara": {
+      "url": "<%= request.base_url %>/mcp/sse",
+      "headers": {
+        "Authorization": "Bearer <%= @mcp_key.plain_key %>"
+      }
+    }
+  }
+}</pre>
+            <%= render DS::Button.new(text: "Copy", variant: "ghost", icon: "copy", data: { action: "clipboard#copy" }) %>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-4 border-t border-primary">
+        <%= render DS::Button.new(
+          text: "Revoke MCP Token",
+          href: destroy_mcp_token_settings_api_key_path,
+          method: :delete,
+          variant: "destructive",
+          data: { turbo_confirm: "Revoke your MCP token? AI assistants using it will lose access immediately." }
+        ) %>
+      </div>
+    </div>
+  <% else %>
+    <div class="space-y-4">
+      <div class="p-3 shadow-border-xs bg-container rounded-lg">
+        <div class="flex items-start gap-3">
+          <%= render DS::FilledIcon.new(icon: "bot", rounded: true, size: "lg") %>
+          <div class="flex-1">
+            <h3 class="font-medium text-primary">Ask Claude about your finances</h3>
+            <p class="text-secondary text-sm mt-1">Generate an MCP token to connect Claude Desktop. Then ask "What are my accounts?" or "Log that I spent $45 at Whole Foods."</p>
+          </div>
+        </div>
+      </div>
+
+      <%= form_with url: create_mcp_token_settings_api_key_path, method: :post do |f| %>
+        <%= render DS::Button.new(text: "Generate MCP Token", variant: "primary", icon: "bot") %>
+      <% end %>
+    </div>
+  <% end %>
+<% end %>
