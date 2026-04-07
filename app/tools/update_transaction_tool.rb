@@ -2,10 +2,10 @@ class UpdateTransactionTool < ApplicationTool
   description "Update an existing transaction. Only updates fields you provide. Scoped to current user's family."
 
   arguments do
-    required(:entry_id).filled(:integer).description("Entry ID to update")
+    required(:entry_id).filled(:string).description("Entry ID (UUID) to update")
     optional(:name).filled(:string).description("New transaction name")
     optional(:date).filled(:string).description("New date in YYYY-MM-DD format")
-    optional(:category_id).filled(:integer).description("New category ID")
+    optional(:category_id).filled(:string).description("New category ID (UUID)")
     optional(:notes).filled(:string).description("Notes or memo")
   end
 
