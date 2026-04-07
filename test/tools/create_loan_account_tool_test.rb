@@ -1,7 +1,7 @@
 require "test_helper"
 
 class CreateLoanAccountToolTest < ActiveSupport::TestCase
-  setup do
+  def setup
     Current.stubs(:family).returns(families(:dylan_family))
     Account.any_instance.stubs(:sync_later)
   end

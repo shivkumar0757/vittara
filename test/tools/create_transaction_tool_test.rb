@@ -1,13 +1,12 @@
 require "test_helper"
 
 class CreateTransactionToolTest < ActiveSupport::TestCase
-  setup do
+  def setup
     @family = families(:dylan_family)
     @account = accounts(:depository)
     Current.stubs(:family).returns(@family)
   end
 
-  # Stub require_write_access! so tests focus on business logic, not auth
   def build_tool
     tool = CreateTransactionTool.new
     tool.stubs(:require_write_access!)

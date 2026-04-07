@@ -1,7 +1,7 @@
 require "test_helper"
 
 class GetNetWorthToolTest < ActiveSupport::TestCase
-  setup do
+  def setup
     Current.stubs(:family).returns(families(:dylan_family))
   end
 

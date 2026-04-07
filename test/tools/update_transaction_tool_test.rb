@@ -1,7 +1,7 @@
 require "test_helper"
 
 class UpdateTransactionToolTest < ActiveSupport::TestCase
-  setup do
+  def setup
     @family = families(:dylan_family)
     @entry = entries(:transaction)
     Current.stubs(:family).returns(@family)

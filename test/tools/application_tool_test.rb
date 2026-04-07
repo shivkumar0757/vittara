@@ -1,7 +1,7 @@
 require "test_helper"
 
 class ApplicationToolTest < ActiveSupport::TestCase
-  setup do
+  def setup
     @user = users(:family_admin)
     @user.api_keys.where(source: "mcp").destroy_all
 

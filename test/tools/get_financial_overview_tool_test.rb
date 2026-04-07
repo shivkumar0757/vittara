@@ -1,7 +1,7 @@
 require "test_helper"
 
 class GetFinancialOverviewToolTest < ActiveSupport::TestCase
-  setup do
+  def setup
     @family = families(:dylan_family)
     Current.stubs(:family).returns(@family)
   end
