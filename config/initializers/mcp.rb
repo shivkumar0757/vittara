@@ -8,12 +8,11 @@ FastMcp.mount_in_rails(
 ) do |server|
   Rails.application.config.after_initialize do
     server.register_tools(
-      # Phase 1B — Read Tools (registered as they are built)
-      # GetFinancialOverviewTool,
-      # GetAccountsTool,
-      # GetNetWorthTool,
-      # GetTransactionsTool,
-      # GetCategoriesTool,
+      GetFinancialOverviewTool,
+      GetAccountsTool,
+      GetNetWorthTool,
+      GetTransactionsTool,
+      GetCategoriesTool,
     )
   end
 end
