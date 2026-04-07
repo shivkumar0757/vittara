@@ -20,7 +20,8 @@ class ApplicationTool < FastMcp::Tool
     end
 
     def extract_bearer_token
-      auth_header = headers["AUTHORIZATION"]
+      # fast-mcp lowercases header keys: HTTP_AUTHORIZATION → "authorization"
+      auth_header = headers["authorization"] || headers["AUTHORIZATION"]
       return nil unless auth_header&.start_with?("Bearer ")
 
       auth_header.split(" ", 2).last.presence
