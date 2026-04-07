@@ -106,3 +106,21 @@ scripts/
 .windsurfrules
 .cursor/rules/dev_workflow.mdc
 .cursor/rules/taskmaster.mdc
+CLAUDE.local.md
+
+# Local development docs (private, never committed)
+local_docs/
+
+# Claude Code local config
+.claude/
+
+# Playwright MCP local cache
+.playwright-mcp/
+
+# Skills lock (project-local, tracked separately)
+skills-lock.json
+
+# Local README
+README.local.md
+mcp-token-generated.png
+settings-api-key.png

@@ -62,7 +62,12 @@ Rails.application.routes.draw do
     end
     resource :billing, only: :show
     resource :security, only: :show
-    resource :api_key, only: [ :show, :new, :create, :destroy ]
+    resource :api_key, only: [ :show, :new, :create, :destroy ] do
+      collection do
+        post :create_mcp_token
+        delete :destroy_mcp_token
+      end
+    end
   end
 
   resource :subscription, only: %i[new show create] do
