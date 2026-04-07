@@ -13,6 +13,11 @@ FastMcp.mount_in_rails(
       GetNetWorthTool,
       GetTransactionsTool,
       GetCategoriesTool,
+      CreateTransactionTool,
+      UpdateTransactionTool,
+      CreateAccountTool,
+      CreateLoanAccountTool,
+      CreateCreditCardAccountTool,
     )
   end
 end
