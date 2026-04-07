@@ -204,4 +204,41 @@ class ApiKeyTest < ActiveSupport::TestCase
     assert_not @api_key.valid?
     assert_includes @api_key.errors[:scopes], "must be either 'read' or 'read_write'"
   end
+
+  # MCP source tests
+  test "should accept mcp as valid source" do
+    @api_key.source = "mcp"
+    assert @api_key.valid?, "Expected mcp source to be valid, got: #{@api_key.errors.full_messages}"
+  end
+
+  test "should allow one active mcp key per user" do
+    @api_key.source = "mcp"
+    @api_key.save!
+
+    second_key = ApiKey.new(
+      user: @user,
+      name: "Second MCP Key",
+      key: "another_mcp_key_456",
+      scopes: [ "read_write" ],
+      source: "mcp"
+    )
+
+    assert_not second_key.valid?
+    assert_includes second_key.errors[:user], "can only have one active API key per source (mcp)"
+  end
+
+  test "mcp key and web key can coexist for same user" do
+    @api_key.source = "web"
+    @api_key.save!
+
+    mcp_key = ApiKey.new(
+      user: @user,
+      name: "MCP Key",
+      key: "mcp_key_789",
+      scopes: [ "read_write" ],
+      source: "mcp"
+    )
+
+    assert mcp_key.valid?, "Expected mcp key to coexist with web key, got: #{mcp_key.errors.full_messages}"
+  end
 end
