@@ -8,7 +8,7 @@ class CreateCategoryTool < ApplicationTool
   arguments do
     required(:name).filled(:string).description("Category name e.g. 'Groceries'")
     optional(:classification).filled(:string).description("'expense' (default) or 'income'")
-    optional(:color).filled(:string).description("Hex color. Valid values: #{VALID_COLORS.join(', ')}")
+    optional(:color).filled(:string).description("Hex color code. Suggested presets: #{VALID_COLORS.join(', ')}. Any valid hex color is accepted.")
     optional(:lucide_icon).filled(:string).description("Icon name. Valid values: #{VALID_ICONS.join(', ')}")
     optional(:parent_id).filled(:string).description("UUID of a parent category — makes this a subcategory. Must share the same classification as the parent.")
   end
