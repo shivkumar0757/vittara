@@ -23,6 +23,7 @@ FastMcp.mount_in_rails(
       CreateAccountTool,
       CreateLoanAccountTool,
       CreateCreditCardAccountTool,
+      CreateCategoryTool,
     )
   end
 end
