@@ -384,7 +384,11 @@ Doorkeeper.configure do
   #   https://datatracker.ietf.org/doc/html/rfc6819#section-4.4.2
   #   https://datatracker.ietf.org/doc/html/rfc6819#section-4.4.3
   #
-  # grant_flows %w[authorization_code client_credentials]
+  # Only allow authorization_code flow. client_credentials is disabled because
+  # MCP tools require a resource_owner (user) to resolve current_family.
+  # Mobile app creates tokens directly via Doorkeeper::AccessToken.create!,
+  # not via grant flows, so this does not affect mobile auth.
+  grant_flows %w[authorization_code]
 
   # Allows to customize OAuth grant flows that +each+ application support.
   # You can configure a custom block (or use a class respond to `#call`) that must
