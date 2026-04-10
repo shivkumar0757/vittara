@@ -9,14 +9,14 @@ class ApplicationTool < FastMcp::Tool
 
     def authenticate_mcp_token!
       token = extract_bearer_token
-      api_key = token ? ApiKey.find_by_value(token) : nil
+      @mcp_auth = McpAuth.resolve(token)
 
-      unless api_key&.active? && api_key.source == "mcp"
+      unless @mcp_auth
         raise UnauthorizedError, "Invalid or missing MCP token"
       end
 
-      setup_current_context(api_key)
-      api_key.update_last_used!
+      setup_current_context(@mcp_auth.user)
+      @mcp_auth.touch_last_used!
     end
 
     def extract_bearer_token
@@ -27,8 +27,7 @@ class ApplicationTool < FastMcp::Tool
       auth_header.split(" ", 2).last.presence
     end
 
-    def setup_current_context(api_key)
-      user = api_key.user
+    def setup_current_context(user)
       session = user.sessions.first ||
         user.sessions.build(user_agent: "MCP Client", ip_address: "0.0.0.0")
       Current.session = session
@@ -39,14 +38,8 @@ class ApplicationTool < FastMcp::Tool
     end
 
     def require_write_access!
-      api_key = find_current_api_key
-      unless api_key&.scopes&.include?("read_write")
+      unless @mcp_auth&.write?
         raise UnauthorizedError, "Write access requires read_write scope"
       end
-    end
-
-    def find_current_api_key
-      token = extract_bearer_token
-      token ? ApiKey.find_by_value(token) : nil
     end
 end
