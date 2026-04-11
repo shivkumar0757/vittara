@@ -9,10 +9,16 @@ class ApplicationTool < FastMcp::Tool
 
     def authenticate_mcp_token!
       token = extract_bearer_token
+
+      unless token
+        raise UnauthorizedError, "Missing MCP token. " \
+          "WWW-Authenticate: Bearer resource_metadata=\"#{resource_metadata_url}\""
+      end
+
       @mcp_auth = McpAuth.resolve(token)
 
       unless @mcp_auth
-        raise UnauthorizedError, "Invalid or missing MCP token"
+        raise UnauthorizedError, "Invalid or expired MCP token"
       end
 
       setup_current_context(@mcp_auth.user)
@@ -41,5 +47,11 @@ class ApplicationTool < FastMcp::Tool
       unless @mcp_auth&.write?
         raise UnauthorizedError, "Write access requires read_write scope"
       end
+    end
+
+    def resource_metadata_url
+      host = ENV.fetch("APP_DOMAIN", "localhost:3000")
+      scheme = host.start_with?("localhost") ? "http" : "https"
+      "#{scheme}://#{host}/.well-known/oauth-protected-resource"
     end
 end
