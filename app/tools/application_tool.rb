@@ -1,57 +1,26 @@
-class ApplicationTool < FastMcp::Tool
-  UnauthorizedError = Class.new(StandardError)
-
-  authorize do |_arguments|
-    authenticate_mcp_token!
+class ApplicationTool < MCP::Tool
+  # Unwrap MCP::Tool::Response back to parsed data (for tests)
+  def self.unwrap(response)
+    JSON.parse(response.to_h[:content].first[:text], symbolize_names: true)
   end
 
-  private
+  class << self
+    private
 
-    def authenticate_mcp_token!
-      token = extract_bearer_token
-
-      unless token
-        raise UnauthorizedError, "Missing MCP token. " \
-          "WWW-Authenticate: Bearer resource_metadata=\"#{resource_metadata_url}\""
+      def current_family(server_context)
+        family = server_context[:family]
+        raise StandardError, "Unauthorized — invalid or missing MCP token" unless family
+        family
       end
 
-      @mcp_auth = McpAuth.resolve(token)
-
-      unless @mcp_auth
-        raise UnauthorizedError, "Invalid or expired MCP token"
+      def require_write_access!(server_context)
+        unless server_context[:mcp_auth]&.write?
+          raise StandardError, "Write access requires read_write scope"
+        end
       end
 
-      setup_current_context(@mcp_auth.user)
-      @mcp_auth.touch_last_used!
-    end
-
-    def extract_bearer_token
-      # fast-mcp lowercases header keys: HTTP_AUTHORIZATION → "authorization"
-      auth_header = headers["authorization"] || headers["AUTHORIZATION"]
-      return nil unless auth_header&.start_with?("Bearer ")
-
-      auth_header.split(" ", 2).last.presence
-    end
-
-    def setup_current_context(user)
-      session = user.sessions.first ||
-        user.sessions.build(user_agent: "MCP Client", ip_address: "0.0.0.0")
-      Current.session = session
-    end
-
-    def current_family
-      Current.family
-    end
-
-    def require_write_access!
-      unless @mcp_auth&.write?
-        raise UnauthorizedError, "Write access requires read_write scope"
+      def text_response(data)
+        MCP::Tool::Response.new([ { type: "text", text: data.to_json } ])
       end
-    end
-
-    def resource_metadata_url
-      host = ENV.fetch("APP_DOMAIN", "localhost:3000")
-      scheme = host.start_with?("localhost") ? "http" : "https"
-      "#{scheme}://#{host}/.well-known/oauth-protected-resource"
-    end
+  end
 end
