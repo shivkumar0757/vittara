@@ -234,7 +234,7 @@
             <pre class="font-mono text-xs text-primary whitespace-pre-wrap break-all" data-clipboard-target="source">{
   "mcpServers": {
     "vittara": {
-      "url": "<%= request.base_url %>/mcp/sse",
+      "url": "<%= request.base_url %>/mcp",
       "headers": {
         "Authorization": "Bearer <%= @mcp_key.plain_key %>"
       }
@@ -261,7 +261,7 @@
       "args": [
         "-y",
         "mcp-remote",
-        "<%= request.base_url %>/mcp/sse",
+        "<%= request.base_url %>/mcp",
         "--header",
         "Authorization:Bearer <%= @mcp_key.plain_key %>"
       ]

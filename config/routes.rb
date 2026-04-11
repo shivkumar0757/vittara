@@ -7,6 +7,10 @@ Rails.application.routes.draw do
   # OAuth discovery endpoints for MCP clients (Claude Custom Connector, etc.)
   get "/.well-known/oauth-authorization-server", to: "well_known#oauth_authorization_server"  # RFC 8414
   get "/.well-known/oauth-protected-resource", to: "well_known#oauth_protected_resource"      # RFC 9728
+
+  # MCP server (Streamable HTTP transport)
+  match "/mcp", to: "mcp#handle", via: [ :get, :post, :delete ]
+
   # MFA routes
   resource :mfa, controller: "mfa", only: [ :new, :create ] do
     get :verify

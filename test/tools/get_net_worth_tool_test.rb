@@ -1,13 +1,14 @@
 require "test_helper"
 
 class GetNetWorthToolTest < ActiveSupport::TestCase
+  include McpToolTestHelper
   def setup
-    Current.stubs(:family).returns(families(:dylan_family))
+    @family = families(:dylan_family)
+    @context = { family: @family, scopes: [ "read_write" ], mcp_auth: OpenStruct.new(write?: true) }
   end
 
   test "returns a hash with required keys" do
-    tool = GetNetWorthTool.new
-    result = tool.call
+    result = call_tool(GetNetWorthTool, server_context: @context)
 
     assert_kind_of Hash, result
     assert_includes result.keys, :net_worth
@@ -17,16 +18,13 @@ class GetNetWorthToolTest < ActiveSupport::TestCase
   end
 
   test "currency matches family currency" do
-    family = families(:dylan_family)
-    tool = GetNetWorthTool.new
-    result = tool.call
+    result = call_tool(GetNetWorthTool, server_context: @context)
 
-    assert_equal family.currency, result[:currency]
+    assert_equal @family.currency, result[:currency]
   end
 
   test "net_worth, assets and liabilities are formatted strings" do
-    tool = GetNetWorthTool.new
-    result = tool.call
+    result = call_tool(GetNetWorthTool, server_context: @context)
 
     assert_kind_of String, result[:net_worth]
     assert_kind_of String, result[:assets]
@@ -34,8 +32,7 @@ class GetNetWorthToolTest < ActiveSupport::TestCase
   end
 
   test "formatted values include currency symbol" do
-    tool = GetNetWorthTool.new
-    result = tool.call
+    result = call_tool(GetNetWorthTool, server_context: @context)
 
     # USD formatted values should contain a dollar sign
     assert_match /\$/, result[:net_worth]
@@ -44,36 +41,30 @@ class GetNetWorthToolTest < ActiveSupport::TestCase
   end
 
   test "assets are greater than zero when family has asset accounts" do
-    family = families(:dylan_family)
     # dylan_family has asset accounts (depository, investment, etc.) in fixtures
-    assert family.accounts.visible.assets.any?
+    assert @family.accounts.visible.assets.any?
 
-    tool = GetNetWorthTool.new
-    result = tool.call
+    result = call_tool(GetNetWorthTool, server_context: @context)
 
-    sheet = BalanceSheet.new(family)
+    sheet = BalanceSheet.new(@family)
     expected_assets = sheet.assets.total_money.format
     assert_equal expected_assets, result[:assets]
   end
 
   test "liabilities are greater than zero when family has liability accounts" do
-    family = families(:dylan_family)
-    assert family.accounts.visible.liabilities.any?
+    assert @family.accounts.visible.liabilities.any?
 
-    tool = GetNetWorthTool.new
-    result = tool.call
+    result = call_tool(GetNetWorthTool, server_context: @context)
 
-    sheet = BalanceSheet.new(family)
+    sheet = BalanceSheet.new(@family)
     expected_liabilities = sheet.liabilities.total_money.format
     assert_equal expected_liabilities, result[:liabilities]
   end
 
   test "net worth equals assets minus liabilities" do
-    family = families(:dylan_family)
-    tool = GetNetWorthTool.new
-    result = tool.call
+    result = call_tool(GetNetWorthTool, server_context: @context)
 
-    sheet = BalanceSheet.new(family)
+    sheet = BalanceSheet.new(@family)
     expected_net_worth = sheet.net_worth_money.format
     assert_equal expected_net_worth, result[:net_worth]
   end

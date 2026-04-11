@@ -116,4 +116,4 @@ group :test do
   gem "simplecov", require: false
 end
 
-gem "fast-mcp", "~> 1.6"
+gem "mcp"

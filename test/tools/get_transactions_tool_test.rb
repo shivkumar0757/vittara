@@ -1,14 +1,14 @@
 require "test_helper"
 
 class GetTransactionsToolTest < ActiveSupport::TestCase
+  include McpToolTestHelper
   def setup
     @family = families(:dylan_family)
-    Current.stubs(:family).returns(@family)
+    @context = { family: @family, scopes: [ "read_write" ], mcp_auth: OpenStruct.new(write?: true) }
   end
 
   test "returns transactions with expected structure" do
-    tool = GetTransactionsTool.new
-    result = tool.call
+    result = call_tool(GetTransactionsTool, server_context: @context)
 
     assert_instance_of Array, result
     result.each do |txn|
@@ -23,8 +23,7 @@ class GetTransactionsToolTest < ActiveSupport::TestCase
   end
 
   test "returns transactions scoped to current family" do
-    tool = GetTransactionsTool.new
-    result = tool.call
+    result = call_tool(GetTransactionsTool, server_context: @context)
 
     family_entry_ids = @family.entries.pluck(:id)
     result.each do |txn|
@@ -33,37 +32,32 @@ class GetTransactionsToolTest < ActiveSupport::TestCase
   end
 
   test "defaults to limit of 20" do
-    tool = GetTransactionsTool.new
-    result = tool.call
+    result = call_tool(GetTransactionsTool, server_context: @context)
 
     assert result.length <= 20
   end
 
   test "respects custom limit" do
-    tool = GetTransactionsTool.new
-    result = tool.call(limit: 1)
+    result = call_tool(GetTransactionsTool, server_context: @context, limit: "1")
 
     assert_equal 1, result.length
   end
 
   test "clamps limit to minimum of 1" do
-    tool = GetTransactionsTool.new
-    result = tool.call(limit: 0)
+    result = call_tool(GetTransactionsTool, server_context: @context, limit: "0")
 
     assert result.length >= 1
   end
 
   test "clamps limit to maximum of 100" do
-    tool = GetTransactionsTool.new
-    result = tool.call(limit: 999)
+    result = call_tool(GetTransactionsTool, server_context: @context, limit: "999")
 
     assert result.length <= 100
   end
 
   test "filters by account_id" do
     account = accounts(:depository)
-    tool = GetTransactionsTool.new
-    result = tool.call(account_id: account.id)
+    result = call_tool(GetTransactionsTool, server_context: @context, account_id: account.id)
 
     result.each do |txn|
       assert_equal account.name, txn[:account]
@@ -72,8 +66,7 @@ class GetTransactionsToolTest < ActiveSupport::TestCase
 
   test "filters by start_date" do
     start_date = 2.days.ago.to_date
-    tool = GetTransactionsTool.new
-    result = tool.call(start_date: start_date.iso8601)
+    result = call_tool(GetTransactionsTool, server_context: @context, start_date: start_date.iso8601)
 
     result.each do |txn|
       assert Date.parse(txn[:date]) >= start_date
@@ -82,8 +75,7 @@ class GetTransactionsToolTest < ActiveSupport::TestCase
 
   test "filters by end_date" do
     end_date = 2.days.ago.to_date
-    tool = GetTransactionsTool.new
-    result = tool.call(end_date: end_date.iso8601)
+    result = call_tool(GetTransactionsTool, server_context: @context, end_date: end_date.iso8601)
 
     result.each do |txn|
       assert Date.parse(txn[:date]) <= end_date
@@ -91,16 +83,14 @@ class GetTransactionsToolTest < ActiveSupport::TestCase
   end
 
   test "returns results ordered by date descending" do
-    tool = GetTransactionsTool.new
-    result = tool.call
+    result = call_tool(GetTransactionsTool, server_context: @context)
 
     dates = result.map { |txn| Date.parse(txn[:date]) }
     assert_equal dates.sort.reverse, dates
   end
 
   test "returns iso8601 formatted date" do
-    tool = GetTransactionsTool.new
-    result = tool.call
+    result = call_tool(GetTransactionsTool, server_context: @context)
 
     result.each do |txn|
       assert_match(/\A\d{4}-\d{2}-\d{2}\z/, txn[:date])
@@ -112,8 +102,7 @@ class GetTransactionsToolTest < ActiveSupport::TestCase
     txn_record = entry.transaction
     category = txn_record.category
 
-    tool = GetTransactionsTool.new
-    result = tool.call
+    result = call_tool(GetTransactionsTool, server_context: @context)
     txn_result = result.find { |t| t[:id] == entry.id }
 
     assert_not_nil txn_result
