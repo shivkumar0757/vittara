@@ -155,6 +155,7 @@ Click **Connect**. You'll be redirected to Vittara to log in and authorize. Afte
 |------|-------------|
 | `create_transaction` | Log a new transaction |
 | `update_transaction` | Edit an existing transaction |
+| `create_transfer` | Move money between accounts. Auto-classifies as CC payment, loan/EMI payment, or regular transfer based on destination account type. |
 | `create_account` | Add Depository, Investment, Crypto, OtherAsset, OtherLiability |
 | `create_loan_account` | Add a loan (mortgage, auto, personal) |
 | `create_credit_card_account` | Add a credit card |
