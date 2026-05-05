@@ -147,17 +147,17 @@ Click **Connect**. You'll be redirected to Vittara to log in and authorize. Afte
 | `get_financial_overview` | Net worth + assets/liabilities + this month income/expenses |
 | `get_accounts` | All accounts with balances |
 | `get_net_worth` | Net worth breakdown |
-| `get_transactions` | Transactions with filters (account, date range, limit) |
+| `get_transactions` | Filters: account_id, date range, tag names, limit |
 | `get_categories` | Spending categories |
 | `get_tags` | List all tags (id, name, color) for the family |
 
 ### Write Tools (requires `read_write` scope)
 | Tool | What it does |
 |------|-------------|
-| `create_transaction` | Log a new transaction |
-| `update_transaction` | Edit an existing transaction |
+| `create_transaction` | Log a new transaction. Optional `tags` accepts an array of tag NAMES. |
+| `update_transaction` | Edit a transaction. `tags` REPLACES the full set; pass `[]` to clear. |
 | `create_transfer` | Move money between accounts. Auto-classifies as CC payment, loan/EMI payment, or regular transfer based on destination account type. |
-| `create_tag` | Create a tag (name + optional color). Tag IDs can be attached to transactions via `tag_ids`. |
+| `create_tag` | Create a tag (name + optional color). |
 | `create_account` | Add Depository, Investment, Crypto, OtherAsset, OtherLiability |
 | `create_loan_account` | Add a loan (mortgage, auto, personal) |
 | `create_credit_card_account` | Add a credit card |

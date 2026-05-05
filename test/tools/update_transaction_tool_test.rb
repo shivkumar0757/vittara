@@ -74,25 +74,34 @@ class UpdateTransactionToolTest < ActiveSupport::TestCase
     assert_equal "Important expense", @entry.reload.notes
   end
 
-  # Tags: replace set
-  test "tag_ids replaces the full tag set" do
+  # Tags: replace set by name
+  test "tags replaces the full tag set (by name)" do
     tag_a = tags(:one)
     tag_b = tags(:two)
     @entry.transaction.update!(tag_ids: [ tag_a.id ])
 
-    result = call_tool(UpdateTransactionTool, server_context: @context, entry_id: @entry.id, tag_ids: [ tag_b.id ])
+    result = call_tool(UpdateTransactionTool, server_context: @context, entry_id: @entry.id, tags: [ tag_b.name ])
 
     assert result[:success]
     assert_equal [ tag_b.id ], @entry.reload.transaction.tag_ids
   end
 
   # Tags: empty array clears tags
-  test "tag_ids: [] clears all tags" do
+  test "tags: [] clears all tags" do
     @entry.transaction.update!(tag_ids: [ tags(:one).id ])
 
-    result = call_tool(UpdateTransactionTool, server_context: @context, entry_id: @entry.id, tag_ids: [])
+    result = call_tool(UpdateTransactionTool, server_context: @context, entry_id: @entry.id, tags: [])
 
     assert result[:success]
     assert_empty @entry.reload.transaction.tags
+  end
+
+  # Tags: unknown name raises with helpful message
+  test "tags raises ArgumentError when a tag name doesn't exist" do
+    error = assert_raises ArgumentError do
+      call_tool(UpdateTransactionTool, server_context: @context, entry_id: @entry.id, tags: [ "DoesNotExist" ])
+    end
+    assert_match(/DoesNotExist/, error.message)
+    assert_match(/create_tag/, error.message)
   end
 end
