@@ -14,7 +14,7 @@ class GetTransactionsTool < ApplicationTool
     def call(server_context:, account_id: nil, start_date: nil, end_date: nil, limit: 20, **_params)
       family = current_family(server_context)
       limit = [ [ limit.to_i, 1 ].max, 100 ].min
-      entries = family.entries.visible.preload(:account, :entryable)
+      entries = family.entries.visible.preload(:account, entryable: { tags: [] })
       entries = entries.where(account_id: account_id) if account_id
       entries = entries.where("date >= ?", Date.parse(start_date)) if start_date
       entries = entries.where("date <= ?", Date.parse(end_date)) if end_date
@@ -26,6 +26,7 @@ class GetTransactionsTool < ApplicationTool
           amount: entry.amount,
           currency: entry.currency,
           category: entry.transaction&.category&.name,
+          tags: entry.transaction&.tags&.map { |t| { id: t.id, name: t.name, color: t.color } } || [],
           account: entry.account.name
         }
       end

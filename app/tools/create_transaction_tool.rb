@@ -1,5 +1,5 @@
 class CreateTransactionTool < ApplicationTool
-  description "Create a new transaction. IMPORTANT: Always confirm details with the user before calling this tool. Required: account_id, amount, date (YYYY-MM-DD), name. Amount sign: positive = expense, negative = income. Or use nature: 'expense'/'income' to auto-sign."
+  description "Create a new transaction. IMPORTANT: Always confirm details with the user before calling this tool. Required: account_id, amount, date (YYYY-MM-DD), name. Amount sign: positive = expense, negative = income. Or use nature: 'expense'/'income' to auto-sign. Optional tag_ids attaches existing tags — call get_tags first to look up UUIDs (do NOT pass tag names)."
 
   input_schema(
     properties: {
@@ -9,6 +9,7 @@ class CreateTransactionTool < ApplicationTool
       name: { type: "string", description: "Transaction name/description" },
       nature: { type: "string", description: "'expense' or 'income' — overrides amount sign" },
       category_id: { type: "string", description: "Category ID (UUID)" },
+      tag_ids: { type: "array", items: { type: "string" }, description: "Array of Tag UUIDs (NOT names). Use get_tags to find IDs, or create_tag first if a needed tag doesn't exist." },
       notes: { type: "string" },
       currency: { type: "string" }
     },
@@ -16,7 +17,7 @@ class CreateTransactionTool < ApplicationTool
   )
 
   class << self
-    def call(server_context:, account_id:, amount:, date:, name:, nature: nil, category_id: nil, notes: nil, currency: nil, **_params)
+    def call(server_context:, account_id:, amount:, date:, name:, nature: nil, category_id: nil, tag_ids: nil, notes: nil, currency: nil, **_params)
       require_write_access!(server_context)
       family = current_family(server_context)
       account = family.accounts.find(account_id)
@@ -30,7 +31,7 @@ class CreateTransactionTool < ApplicationTool
         currency: currency,
         notes: notes,
         entryable_type: "Transaction",
-        entryable_attributes: { category_id: category_id }.compact
+        entryable_attributes: { category_id: category_id, tag_ids: tag_ids }.compact
       )
 
       if entry.save

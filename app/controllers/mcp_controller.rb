@@ -16,7 +16,7 @@ class McpController < ApplicationController
       MCP::Server.new(
         name: "vittara",
         version: "1.0.0",
-        tools: MCP::Tool.descendants - [ ApplicationTool ],
+        tools: MCP::Tool.descendants.reject { |t| t.name == "ApplicationTool" }.uniq(&:name),
         server_context: {
           family: auth&.user&.family,
           scopes: auth&.scopes || [],

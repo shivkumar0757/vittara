@@ -142,4 +142,21 @@ class CreateTransactionToolTest < ActiveSupport::TestCase
     entry = Entry.find(result[:id])
     assert_equal category.id, entry.transaction.category_id
   end
+
+  test "persists tag_ids when provided" do
+    tag = tags(:one)
+
+    result = call_tool(CreateTransactionTool,
+      server_context: @context,
+      account_id: @account.id,
+      amount: "50.00",
+      date: "2026-01-15",
+      name: "Hotel",
+      tag_ids: [ tag.id ]
+    )
+
+    assert result[:success]
+    entry = Entry.find(result[:id])
+    assert_equal [ tag.id ], entry.transaction.tag_ids
+  end
 end
