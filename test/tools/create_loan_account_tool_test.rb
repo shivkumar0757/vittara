@@ -22,7 +22,7 @@ class CreateLoanAccountToolTest < ActiveSupport::TestCase
   end
 
   test "returns success hash with id, name, and balance" do
-    result = call_tool(CreateLoanAccountTool,server_context: @context, name: "Auto Loan", balance: "15000.0")
+    result = call_tool(CreateLoanAccountTool, server_context: @context, name: "Auto Loan", balance: "15000.0")
 
     assert result[:success]
     assert_not_nil result[:id]
@@ -31,7 +31,7 @@ class CreateLoanAccountToolTest < ActiveSupport::TestCase
   end
 
   test "uses balance as initial_balance when not provided" do
-    result = call_tool(CreateLoanAccountTool,server_context: @context, name: "Personal Loan", balance: "8000.0")
+    result = call_tool(CreateLoanAccountTool, server_context: @context, name: "Personal Loan", balance: "8000.0")
 
     assert result[:success]
     account = Account.find(result[:id])
@@ -40,7 +40,7 @@ class CreateLoanAccountToolTest < ActiveSupport::TestCase
   end
 
   test "uses family currency when none provided" do
-    result = call_tool(CreateLoanAccountTool,server_context: @context, name: "Student Loan", balance: "20000.0")
+    result = call_tool(CreateLoanAccountTool, server_context: @context, name: "Student Loan", balance: "20000.0")
 
     assert result[:success]
     created = Account.find(result[:id])

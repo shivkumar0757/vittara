@@ -143,7 +143,7 @@ class CreateTransactionToolTest < ActiveSupport::TestCase
     assert_equal category.id, entry.transaction.category_id
   end
 
-  test "persists tag_ids when provided" do
+  test "attaches tags by name (case-insensitive)" do
     tag = tags(:one)
 
     result = call_tool(CreateTransactionTool,
@@ -152,11 +152,27 @@ class CreateTransactionToolTest < ActiveSupport::TestCase
       amount: "50.00",
       date: "2026-01-15",
       name: "Hotel",
-      tag_ids: [ tag.id ]
+      tags: [ tag.name.downcase ]
     )
 
     assert result[:success]
     entry = Entry.find(result[:id])
     assert_equal [ tag.id ], entry.transaction.tag_ids
+  end
+
+  test "raises ArgumentError listing available tags when a tag name doesn't exist" do
+    error = assert_raises ArgumentError do
+      call_tool(CreateTransactionTool,
+        server_context: @context,
+        account_id: @account.id,
+        amount: "10.00",
+        date: "2026-01-15",
+        name: "Test",
+        tags: [ "Nonexistent" ]
+      )
+    end
+    assert_match(/Nonexistent/, error.message)
+    assert_match(/Available:/, error.message)
+    assert_match(/create_tag/, error.message)
   end
 end

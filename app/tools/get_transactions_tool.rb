@@ -1,23 +1,29 @@
 class GetTransactionsTool < ApplicationTool
-  description "List transactions with optional filters by account, date range, or limit"
+  description "List transactions with optional filters by account, date range, tag names, or limit. " \
+              "Tags filter accepts NAMES (case-insensitive) — returns transactions tagged with ANY of the listed names."
 
   input_schema(
     properties: {
       account_id: { type: "string", description: "Filter by account ID" },
       start_date: { type: "string", description: "Start date (YYYY-MM-DD)" },
       end_date: { type: "string", description: "End date (YYYY-MM-DD)" },
+      tags: { type: "array", items: { type: "string" }, description: "Filter by tag NAMES e.g. ['Vacation','Reimbursable']. Case-insensitive. Returns transactions matching ANY listed tag." },
       limit: { type: "integer", description: "Max results (default 20, max 100)" }
     }
   )
 
   class << self
-    def call(server_context:, account_id: nil, start_date: nil, end_date: nil, limit: 20, **_params)
+    def call(server_context:, account_id: nil, start_date: nil, end_date: nil, tags: nil, limit: 20, **_params)
       family = current_family(server_context)
       limit = [ [ limit.to_i, 1 ].max, 100 ].min
       entries = family.entries.visible.preload(:account, entryable: { tags: [] })
       entries = entries.where(account_id: account_id) if account_id
       entries = entries.where("date >= ?", Date.parse(start_date)) if start_date
       entries = entries.where("date <= ?", Date.parse(end_date)) if end_date
+      if tags.present?
+        matching_txn_ids = family.transactions.joins(:tags).where("LOWER(tags.name) IN (?)", tags.map(&:downcase)).distinct.pluck(:id)
+        entries = entries.where(entryable_type: "Transaction", entryable_id: matching_txn_ids)
+      end
       transactions = entries.order(date: :desc).limit(limit).map do |entry|
         {
           id: entry.id,

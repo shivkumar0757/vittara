@@ -108,4 +108,18 @@ class GetTransactionsToolTest < ActiveSupport::TestCase
     assert_not_nil txn_result
     assert_equal category.name, txn_result[:category]
   end
+
+  test "filters by tag name (case-insensitive)" do
+    tag = tags(:one)
+    entry = entries(:transaction)
+    entry.transaction.update!(tag_ids: [ tag.id ])
+
+    result = call_tool(GetTransactionsTool, server_context: @context, tags: [ tag.name.downcase ])
+
+    ids = result.map { |t| t[:id] }
+    assert_includes ids, entry.id
+    result.each do |txn|
+      assert txn[:tags].any? { |t| t[:name].downcase == tag.name.downcase }
+    end
+  end
 end
